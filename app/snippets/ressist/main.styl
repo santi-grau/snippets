@@ -1,0 +1,29 @@
+@import '../../css/main.styl'
+#main
+    position fixed
+    top 0
+    left 0
+    width 100vw
+    height 100vh
+    &.inv
+        .inner
+            &.resist
+                background-color #ffffff
+                background-image url('./resist_b.png')
+            &.power
+                background-color #000000
+                background-image url('./power_w.png'), url('./power_w.png')
+    .inner
+        height 100vh
+        background-size 96% auto
+        
+        background-repeat repeat-y
+        &.resist
+            background-position center top
+            background-color #000000
+            background-image url('./resist_w.png')
+        &.power
+            background-position center bottom
+            background-color #ffffff
+            background-image url('./power_b.png')
+

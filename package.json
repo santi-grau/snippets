@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "parcel app/views/*.pug --open",
-    "build": "rm -rf docs && parcel build app/views/index.pug --no-source-maps --out-dir docs --public-url `.`"
+    "start": "node server.js",
+    "new": "sh init.sh",
+    "build": "rm -rf docs && parcel build app/views/*.pug --no-source-maps --out-dir docs --public-url '.'"
   },
   "keywords": [],
   "author": "proper-code",
@@ -20,12 +21,15 @@
     "stylus": "^0.54.7"
   },
   "dependencies": {
+    "chroma-js": "^2.1.0",
     "glsl-curl-noise": "0.0.4",
     "glsl-noise": "0.0.0",
     "glsl-rotate": "^1.1.0",
     "glsl-y-hsv": "^1.0.0",
+    "googlefontcss64": "^1.0.0",
     "matter-js": "^0.14.2",
     "simplex-noise": "^2.4.0",
-    "three": "*"
+    "three": "*",
+    "trim-canvas": "^0.1.2"
   }
 }

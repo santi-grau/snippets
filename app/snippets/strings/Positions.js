@@ -1,5 +1,6 @@
 import { DataTexture, RGBAFormat, FloatType, Vector3, Matrix4, NearestFilter } from 'three'
 import EventEmitter from 'events'
+import { Vector } from 'matter-js'
 
 class DataStream extends EventEmitter {
     constructor( row, segments, streamId, loop ){
@@ -81,7 +82,26 @@ class DataStream extends EventEmitter {
         var point1 = this.points[ 1 ]
 
         var lastTangent = this.getTangent( point0, point1 )
-        var tmpNormal = new Vector3( 1.0, 0.0, 0.0 )
+
+        var absTangent = new Vector3( Math.abs( lastTangent.x ), Math.abs( lastTangent.y ), Math.abs( lastTangent.x ) )
+
+
+        var min = 1.79769313e+308;
+
+        var tmpNormal = new Vector3( 0.0, 0.0, 0.0 )
+
+        if (absTangent.x <= min) {
+            min = absTangent.x;
+            tmpNormal.x = 1.0;
+          }
+          if (absTangent.y <= min) {
+            min = absTangent.y;
+            tmpNormal.y = 1.0;
+          }
+          if (absTangent.z <= min) {
+            tmpNormal.z = 1.0;
+          }
+
 
         tmpVec.crossVectors( lastTangent, tmpNormal ).normalize();
         lastNormal.crossVectors( lastTangent, tmpVec );
@@ -90,17 +110,25 @@ class DataStream extends EventEmitter {
 
         var maxLen = ( this.segments - 1.0 )
 
+        var normal = new Vector3( );
+        var tangent = new Vector3();
+        var binormal = new Vector3();
+        var point = new Vector3();
+        var epSq = Number.EPSILON * Number.EPSILON;
         for ( var i = 1 ; i < maxLen ; i ++ ) {
+
+
            point = this.points[ i ]
            tangent = this.getTangent( lastPoint, point )
            normal = lastNormal
            binormal = lastBinormal
            tmpVec.crossVectors( lastTangent, tangent )
 
-           if ( tmpVec.length() > Number.EPSILON ) {
-            	tmpVec.normalize()
-            	var theta = Math.acos( Math.min( 1 , Math.max( lastTangent.dot( tangent), -1 ) ) )
-            	normal.applyMatrix4( mat.makeRotationAxis( tmpVec, theta ) )
+            if ( ( tmpVec.x * tmpVec.x + tmpVec.y * tmpVec.y + tmpVec.z * tmpVec.z) > epSq ) {
+                tmpVec.normalize()
+                var tangentDot = lastTangent.dot( tangent);
+                var theta = Math.acos( Math.min( 1, Math.max( -1, tangentDot ) ) )
+                normal.applyMatrix4( mat.makeRotationAxis( tmpVec, theta ) )
             }
             
             binormal.crossVectors( tangent, normal )
@@ -209,9 +237,9 @@ class Positions extends DataTexture{
         data[ 3 + ( this.length - 1 ) * 4 + this.length * 4 * 3 + rowOffset ] = ( ( index - 1 ) / this.length )
         
         if( index == 1 ) {
-            data[ 0 + 0 * 4 + this.length * 4 + rowOffset ] = frs[ 0 ].x
-            data[ 1 + 0 * 4 + this.length * 4 + rowOffset ] = frs[ 0 ].y
-            data[ 2 + 0 * 4 + this.length * 4 + rowOffset ] = frs[ 0 ].z
+            data[ 0 + 0 * 4 + this.length * 4 + rowOffset ] = frs[ 1 ].x
+            data[ 1 + 0 * 4 + this.length * 4 + rowOffset ] = frs[ 1 ].y
+            data[ 2 + 0 * 4 + this.length * 4 + rowOffset ] = frs[ 1 ].z
 
             data[ 0 + 0 * 4 + this.length * 4 * 2 + rowOffset ] = frs[ 1 ].x
             data[ 1 + 0 * 4 + this.length * 4 * 2 + rowOffset ] = frs[ 1 ].y

@@ -1,4 +1,4 @@
-import Scroller from './../../Scroller'
+
 import * as THREE from 'three';
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js';
 import positionShader from './position.frag'
@@ -6,9 +6,9 @@ import velocityShader from './velocity.frag'
 import WaterMesh from './WaterMesh'
 import Planes from './Planes'
 
-class Water extends Scroller{
+class Water {
     constructor(){
-        super()
+        
         this.title = 'Washed away'
 
         this.WIDTH = 128
@@ -83,12 +83,15 @@ class Water extends Scroller{
         this.gpuCompute.setVariableDependencies( this.velocityVariable, [ this.positionVariable, this.velocityVariable ] )
         
         this.gpuCompute.init()
+
+        this.onWindowResize()
+        this.step()
     }
 
     onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize( window.innerWidth, window.innerHeight );
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize( window.innerWidth, window.innerHeight );
     }
 
     setMouseCoords( x, y ) {
@@ -115,6 +118,7 @@ class Water extends Scroller{
     }
 
     step( time ){
+        requestAnimationFrame( () => this.step() )
         this.waterMesh.setPoint( new THREE.Vector3( 10000, 10000 ) )
         if ( this.mouseMoved ) {
             this.raycaster.setFromCamera( this.mouseCoords, this.camera )
@@ -137,4 +141,4 @@ class Water extends Scroller{
     }
 }
 
-export { Water as default }
+new Water()

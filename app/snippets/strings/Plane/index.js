@@ -14,7 +14,7 @@ import * as mats from './PlaneMaterial'
 // 9 -> 'PlaneBrushMaterial' 
 
 class Plane extends Group{
-    constructor( positions, lineLength, index, materials = [ 'PlaneTextureMaterial', 'PlaneTextureMaterial' ], geometryOptions = {} ){
+    constructor( positions, lineLength, index, materials = [ 'PlaneTextureMaterial', 'PlaneTextureMaterial' ], geometryOptions = {},  materialOptions = {} ){
         super()
         
         this.res = 2
@@ -50,6 +50,9 @@ class Plane extends Group{
             mesh.frustumCulled = false
             
             if( geometryOptions.radius ) mesh.material.uniforms.geometryOptions.value.x = geometryOptions.radius
+            if( geometryOptions.color ) mesh.material.uniforms.matData.value.y = geometryOptions.color.x
+            if( geometryOptions.color ) mesh.material.uniforms.matData.value.z = geometryOptions.color.y
+            if( geometryOptions.color ) mesh.material.uniforms.matData.value.w = geometryOptions.color.z
             if( geometryOptions.wireframe ) mesh.material.wireframe = true
 
             this.add( mesh )

@@ -4,38 +4,36 @@ import Positions from './Positions'
 import SimplexNoise from 'simplex-noise'
 import Geo from './Plane'
 
-class Drums extends Object3D{
+
+class Ambient extends Object3D{
     constructor( positions ){
         super()
         this.positions = positions
         this.simplex = new SimplexNoise( Math.random )
 
-        this.streams = []
-        for( var i = 0 ; i < 2 ; i++ ){
-            var stream = positions.newDataStream( true, 256 )
-            this.streams.push( stream )
-            var geometryOptions = { radius : 0.2 }
-            this.add( new Geo( positions, 128, stream.id, [ 'PlaneStripeMaterial', 'PlaneSquareMaterial' ], geometryOptions ) )
-        }
+         
+        var geometryOptions = { radius : 0.45  }
+        var g = new Geo( this.positions, 128, this.positions.newDataStream( false, 128 ).id, [ 'PlaneStripeMaterial', 'PlaneRainbowMaterial' ], geometryOptions )
+        this.add( g )
 
-        this.drumPlayhead = 0
-       
+        var geometryOptions = { radius : 0.25  }
+        var g = new Geo( this.positions, 1024, this.positions.newDataStream( false, 1024 ).id, [ 'PlaneSquareMaterial', 'PlaneRainbowMaterial' ], geometryOptions )
+        this.add( g )
+
     }
 
     simulatePosition( time, seed ){
-        var x = this.simplex.noise3D( 1.3, 100 * seed, time * 0.01 ) * 2
-        var y = this.simplex.noise3D( 34 * seed, time * 0.01, 1.2 ) * 2 
-        var z = this.simplex.noise3D( time * 0.01, 1 * seed, 1 ) * 2
+        var x = this.simplex.noise3D( 130 + seed , 100, time * 0.00025 ) * 2
+        var y = this.simplex.noise3D( 140, time * 0.00025, 12 ) * 1.5
+        var z = this.simplex.noise3D( time * 0.00025, 1, 10) * 2 
         return new Vector3( x, y, z )
     }
 
     step( time ){
-        this.drumPlayhead += 0.1
-        this.streams.forEach( ( s, i ) => {
-            this.positions.addPoint( s, this.simulatePosition( this.drumPlayhead, i ), 1 )
-        } )
-
-        this.children.forEach( s => s.step( time ) )
+        this.positions.streams.forEach( ( s, i ) =>{
+            this.positions.addPoint( s, this.simulatePosition( time, i ) )
+        })
+        
     }
 }
 
@@ -43,49 +41,57 @@ class Tunnel{
     constructor(){
         this.timeInc = 0
         this.node = document.getElementById( 'main' )
-        
 
         this.scene = new Scene()
         
         this.camera = new PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 )
         this.camera.lookAt( new Vector3( ) )
-        this.camera.position.z = 2
+        this.camera.position.z = 6
+        this.camera.lookAt( new Vector3( 0,0,0 ) )
         this.scene.add( this.camera )
 
         this.renderer = new WebGLRenderer( { antialias : true, alpha : true } )
         this.node.appendChild( this.renderer.domElement )
-
-        this.positions = new Positions()
+        this.rotationInc = 0
+        this.positions = new Positions( 2048, 1024 )
         
-        this.drums = new Drums( this.positions )
-        this.scene.add( this.drums )
+        document.body.style.height = window.innerHeight * 3 + 'px'
+
+        this.scrolling = false
+        document.addEventListener( 'scroll', ( e ) => {
+            var scrolled = window.scrollY
+            this.ambient.step( scrolled )
+            if ( window.scrollY + window.innerHeight >= document.body.offsetHeight - window.innerHeight * 0.2 ) {
+                document.body.style.height = parseInt( document.body.style.height ) + window.innerHeight + 'px'
+            }
+            this.scrolling = true
+            if( this.scrollTimeout ) clearTimeout( this.scrollTimeout )
+            this.scrollTimeout = setTimeout( () => this.scrolling = false, 500 )
+            
+        })
+
+        this.ambient = new Ambient( this.positions )
+        this.scene.add( this.ambient )
         this.mouseIsDown = false
         
-      
         this.onResize()
-        this.step()
+        this.step( 0 )
     }
 
     onResize( ) {
         var [ width, height ] = [ this.node.offsetWidth, this.node.offsetHeight ]
+        height += 115
         this.renderer.setSize( width, height )
-		this.renderer.setPixelRatio( window.devicePixelRatio * 2 )
-        // var camView = { left :  width / -2, right : width / 2, top : height / 2, bottom : height / -2 }
-        // for ( var prop in camView ) this.camera[ prop ] = camView[ prop ]
-        // this.camera.position.z = 100
-        // this.camera.updateProjectionMatrix()
-    }
-
-    simulatePosition( time, seed ){
-        var x = this.simplex.noise3D( 1.3, 100 * seed, time * 0.01 ) * 2
-        var y = this.simplex.noise3D( 34 * seed, time * 0.01, 1.2 ) * 2 
-        var z = this.simplex.noise3D( time * 0.01, 1 * seed, 1 ) * 2
-        return new Vector3( x, y, z )
+		this.renderer.setPixelRatio( window.devicePixelRatio )
+        this.camera.aspect = window.innerWidth / window.innerHeight
+        this.camera.updateProjectionMatrix()
     }
   
     step( time ){
-        requestAnimationFrame( () => this.step() )
-        this.drums.step( time )
+        requestAnimationFrame( ( time ) => this.step( time ) )
+        this.ambient.rotation.y += this.rotationInc
+        if( this.scrolling ) this.rotationInc += ( 0.01 - this.rotationInc ) * 0.3
+        else this.rotationInc -= this.rotationInc * 0.1
         this.renderer.render( this.scene, this.camera )
     }
 }

@@ -1,5 +1,5 @@
 
-import fonts from './gfonts.json'
+import fonts from './../../common/gfonts.json'
 
 class Shapes {
     constructor(){

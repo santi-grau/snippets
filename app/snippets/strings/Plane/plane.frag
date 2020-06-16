@@ -30,13 +30,13 @@ void main() {
 
     // index 2 ---> Rainbow
     if( matData.x == 2.0 ) {
-        if( matData.y == 0.0 ) cout = vec3( hsv2rgb( vec3( floor( segmentIndex * 0.7 * 10.0 ) / 10.0, 1.0, 1.0 ) ) );
-        else cout = vec3( hsv2rgb( vec3( vData.x, 1.0, 1.0 ) ) );
+        cout = vec3( hsv2rgb( vec3( floor( segmentIndex * 9.0 ) / 10.0, 1.0, 1.0 ) ) );
+        
     }
 
     // index 3 ---> Edges
-    if( matData.x == 3.0 ) cout = vec3( 1.0 - smoothstep( 0.015, 0.015, segmentIndex ) + smoothstep( 0.985, 0.985, segmentIndex ) );
-    if( matData.x == 3.0 && matData.y == 1.0 ) cout = vec3( 1.0 ) - cout;
+    if( matData.x == 3.0 ) cout = vec3( 1.0 - smoothstep( 0.02, 0.02, segmentIndex ) + smoothstep( 0.975, 0.975, segmentIndex ) );
+    
 
     // index 4 ---> Stripes
     if( matData.x == 4.0 ) {
@@ -65,7 +65,7 @@ void main() {
     //     cout = texture2D( map, vec2( segmentIndex, vData.x * noise ) ).rgb;
     // }
 
-    cout *= ( vNormal.z + 0.5 ) * 0.6 + 0.6;
+    cout *= ( (vNormal.x + 0.5) * 2.0 + 0.65 ) + 0.35;
 
     gl_FragColor = vec4( cout, a );
 }

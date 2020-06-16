@@ -1,0 +1,79 @@
+@import '../../css/main.styl'
+
+html, body
+    height 100%
+    padding 0
+    margin 0
+    
+
+#body
+    background #ffffff
+
+#main
+    position relative
+    z-index 2
+    .row
+        overflow hidden
+        
+body
+    &.down,&.up
+        mod-row
+            .inner
+                transform translate3d( 0, 0, 0 )
+    &.down
+        mod-row
+            .inner
+                transform translate3d( 0, -50%, 0 )
+mod-row
+    display block
+    overflow hidden
+    &.animatel
+        .inner
+            .line
+                animation-name examplel
+                
+    &.animater
+        .inner
+            .line
+                animation-name exampler
+
+    .inner
+        transform translate3d( 0, 100%, 0 )
+        position relative
+        height 200%
+        font-size 100px
+        line-height 100px
+        transition transform 0.45s
+        .line
+            height calc( 50% - 1px )
+            background-size auto 66%
+            background-position 120% 50%
+            background-repeat repeat-x
+            animation-duration 40s
+            animation-iteration-count infinite
+            animation-timing-function linear
+            
+#instruction
+    position fixed
+    top 50%
+    left 50%
+    transform translate3d( -50%, -50%, 0 )
+    font-size 11px
+    font-family monospace
+
+svg, canvas
+    position absolute
+    top 0
+    left 0
+
+@keyframes examplel
+  from
+    background-position-x 0%
+  to
+    background-position-x -1000%
+
+@keyframes exampler
+  from
+    background-position-x 0%
+  to
+    background-position-x 1000%
