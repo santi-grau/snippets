@@ -55,6 +55,11 @@ class Snippet{
         this.mode = 'scroll'
 
         document.querySelector('button').addEventListener( 'click', () =>  this.action() )
+
+        for( var i = 0 ; i < this.rowLength ; i++ ){
+            var curline = document.createElement( 'div' )
+            this.node.appendChild( curline )
+        }
         
     }
 
@@ -80,10 +85,11 @@ class Snippet{
         // $@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,
         var chars = '.:;!i=o*%@#W'
         var curline
+        // this.node.innerHTML = ''
         for(var i = 0; i < this.data.length; i += 4 ) {
             if( i / 4 % this.lineLength == 0 ) {
-                curline = document.createElement( 'div' )
-                this.node.appendChild( curline )
+                curline = this.node.childNodes[ i / 4 / this.lineLength ]
+                curline.innerHTML = ''
             }
             var brightness = 255 - ( 0.34 * this.data[i] + 0.5 * this.data[i + 1] + 0.16 * this.data[i + 2] )
             curline.innerHTML += chars[ Math.round( brightness / 255 * ( chars.length - 1 ) *  ( 1 - inc ) )  ]
