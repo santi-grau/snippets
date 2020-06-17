@@ -79,14 +79,17 @@ class Snippet{
 
         // $@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,
         var chars = '.:;!i=o*%@#W'
-
+        var curline
         for(var i = 0; i < this.data.length; i += 4 ) {
+            if( i / 4 % this.lineLength == 0 ) {
+                curline = document.createElement( 'div' )
+                this.node.appendChild( curline )
+            }
             var brightness = 255 - ( 0.34 * this.data[i] + 0.5 * this.data[i + 1] + 0.16 * this.data[i + 2] )
-            
-            str += chars[ Math.round( brightness / 255 * ( chars.length - 1 ) *  ( 1 - inc ) )  ]
+            curline.innerHTML += chars[ Math.round( brightness / 255 * ( chars.length - 1 ) *  ( 1 - inc ) )  ]
             
         }
-        this.node.innerHTML = str
+        // this.node.innerHTML = str
     }
 
     screenShot(){
