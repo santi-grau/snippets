@@ -1,4 +1,4 @@
-import portrait from './portrait.jpg'
+import portraits from './portraits/*.jpg'
 
 const constraints = { audio: false, video: true }
 var video = document.querySelector( 'video' )
@@ -37,6 +37,9 @@ class Snippet{
         var ctx = this.canvas.getContext( '2d' )
         var img = new Image()
         this.data = []
+
+        var ar = Object.values( portraits )
+        var def = ar[ Math.floor( Math.random() * ar.length ) ]
         img.onload = ( i ) => {
             var im = i.target, imar = im.height / im.width, frar = this.canvas.height / this.canvas.width
             var [ w, h ] = [ this.canvas.height / imar, this.canvas.height ]
@@ -46,7 +49,7 @@ class Snippet{
 
             this.step()
         }
-        img.src = portrait
+        img.src = def
 
         document.body.appendChild( this.canvas )
         this.mode = 'scroll'
