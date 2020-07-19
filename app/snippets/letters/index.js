@@ -3,6 +3,9 @@ import Planes from './Planes'
 import shaders from './shaders/*.*'
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
+import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass.js'
 
 class Snippet{
     constructor(){
@@ -94,6 +97,15 @@ class Snippet{
         })
 
         this.onResize()
+
+        this.composer = new EffectComposer( this.renderer )
+        this.composer.addPass( new RenderPass( this.scene, this.camera ) )
+
+        this.afterimagePass = new AfterimagePass()
+
+        this.composer.addPass( this.afterimagePass )
+        this.afterimagePass.uniforms[ 'damp' ].value = 0.96
+
         this.step()
     }
 
@@ -119,7 +131,7 @@ class Snippet{
         this.positionUniforms[ 'rand' ] = { value: new Vector3( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 ) }
         
         this.planes.step( time )
-        
+        // this.composer.render();
         this.renderer.render( this.scene, this.camera )
     }
 }

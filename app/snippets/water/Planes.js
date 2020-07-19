@@ -36,6 +36,7 @@ class Planes extends Mesh{
         this.material = new ShaderMaterial( {
             uniforms : {
                 posTex : { value : null },
+                heightmap : { value : null },
                 res : { value : new Vector2( 512, 512 ) }
             },
             transparent : true,

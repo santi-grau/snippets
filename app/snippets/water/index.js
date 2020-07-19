@@ -26,7 +26,7 @@ class Water {
         document.body.appendChild( this.container )
 
         this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 )
-        this.camera.position.set( 0, 600, 0 )
+        this.camera.position.set( 600, 300, 600 )
         this.camera.lookAt( new THREE.Vector3( 0, 0, 0 ) )
 
         this.scene = new THREE.Scene();
@@ -46,8 +46,8 @@ class Water {
         this.scene.add( this.meshRay );
 
         document.addEventListener( 'mousemove', ( e ) => this.onDocumentMouseMove( e ) )
-        document.addEventListener( 'touchstart', ( e ) => this.onDocumentTouchStart( e ) )
-        document.addEventListener( 'touchmove', ( e ) => this.onDocumentTouchMove( e ) )
+        // document.addEventListener( 'touchstart', ( e ) => this.onDocumentTouchStart( e ) )
+        // document.addEventListener( 'touchmove', ( e ) => this.onDocumentTouchMove( e ) )
         window.addEventListener( 'resize', ( e ) => this.onWindowResize( e ) )
         
         this.waterMesh = new WaterMesh( this.WIDTH, this.BOUNDS, this.renderer )
@@ -56,7 +56,7 @@ class Water {
 
         
 
-        var particles = 16
+        var particles = 64
         this.gpuCompute = new GPUComputationRenderer( particles, particles, this.renderer )
         this.dtPosition = this.gpuCompute.createTexture()
         this.dtVelocity = this.gpuCompute.createTexture()
@@ -129,7 +129,8 @@ class Water {
         
         this.planes.material.uniforms.posTex.value = this.gpuCompute.getCurrentRenderTarget( this.positionVariable ).texture;
         this.waterMesh.material.uniforms.debug.value = this.waterMesh.gpuCompute.getCurrentRenderTarget( this.waterMesh.heightmapVariable ).texture
-        
+        this.planes.material.uniforms[ "heightmap" ].value = this.waterMesh.gpuCompute.getCurrentRenderTarget( this.waterMesh.heightmapVariable ).texture
+
         this.waterMesh.step( time )
         
         this.positionUniforms[ 'levelTexture' ] = { value: this.waterMesh.gpuCompute.getCurrentRenderTarget( this.waterMesh.heightmapVariable ).texture };

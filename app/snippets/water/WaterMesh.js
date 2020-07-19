@@ -12,7 +12,7 @@ class WaterMesh extends Mesh{
 
         this.renderer = renderer
 
-        this.mouseSize = 50
+        this.mouseSize = 100
         this.viscosity = 0.99
 
         this.geometry = new PlaneBufferGeometry( BOUNDS, BOUNDS, WIDTH - 1, WIDTH - 1 );

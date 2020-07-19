@@ -1,6 +1,6 @@
 import { Scene, WebGLRenderer, OrthographicCamera, TextureLoader, Vector2, Vector4, PlaneBufferGeometry, CanvasTexture, Mesh, MeshBasicMaterial, RepeatWrapping } from 'three'
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js'
-import shaderPosition from './feedback2.frag'
+import shaderPosition from './feedback.frag'
 import shaderVelocity from './velocity.frag'
 import im from './resist.png'
 

@@ -21,7 +21,10 @@
     "stylus": "^0.54.7"
   },
   "dependencies": {
+    "@wizpanda/super-gif": "0.0.5",
     "chroma-js": "^2.1.0",
+    "dat.gui": "^0.7.7",
+    "gif.js": "^0.2.0",
     "glsl-curl-noise": "0.0.4",
     "glsl-noise": "0.0.0",
     "glsl-rotate": "^1.1.0",
@@ -30,6 +33,7 @@
     "matter-js": "^0.14.2",
     "simplex-noise": "^2.4.0",
     "three": "*",
-    "trim-canvas": "^0.1.2"
+    "trim-canvas": "^0.1.2",
+    "voronoi-diagram": "^1.0.1"
   }
 }
