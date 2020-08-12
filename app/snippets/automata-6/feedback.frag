@@ -60,7 +60,7 @@ void main()	{
 
     vec2 uv = gl_FragCoord.xy / resolution.xy;
 
-    vec2 inc = vec2( 2.0 ) / size;
+    vec2 inc = vec2( 1.0 ) / size;
     float l = uv.x - inc.x;
     float r = uv.x + inc.x;
     float b = uv.y - inc.y;
