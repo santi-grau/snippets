@@ -44,7 +44,7 @@ class Snippet{
         var planeSize = Math.max( this.node.offsetWidth, this.node.offsetHeight )
         this.plane = new Mesh( new PlaneBufferGeometry( planeSize, planeSize ), new MeshBasicMaterial( { map : this.dtPosition } ) )
         this.scene.add( this.plane )
-
+        setTimeout( ( ) => this.simulate(), 1000 )
         this.onResize()
         this.step( 0 )
     }
@@ -59,6 +59,14 @@ class Snippet{
         this.mouse.x = ( e.clientX / this.node.offsetWidth ) * 2 - 1;
         this.mouse.y = - ( e.clientY / this.node.offsetHeight ) * 2 + 1;
         this.cursorAction()
+    }
+
+    simulate(){
+        this.positionUniforms[ 'touch' ] = { value: new Vector2( Math.random(), Math.random() ) }
+        this.positionUniforms[ 'seed' ] = { value: Math.random() }
+        this.positionUniforms[ 'ramp' ] = { value: 1.0 }
+        this.positionUniforms[ 'touching' ] = { value: true }
+        setTimeout( ( ) => this.simulate(), 1000 + Math.random() * 3000 )
     }
 
     cursorAction( ){

@@ -24,7 +24,7 @@ class Snippet{
         document.body.appendChild( canvas )
         var ctx = canvas.getContext( '2d' )
 
-        ctx.fillStyle = 'black'
+        ctx.fillStyle = 'white'
         ctx.fillRect(0, 0, canvas.width, canvas.height)
 
         ctx.strokeStyle = '#00ff00'

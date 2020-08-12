@@ -1,6 +1,8 @@
-import { Scene, WebGLRenderer, OrthographicCamera, Raycaster, Vector2, PlaneBufferGeometry, Mesh, MeshBasicMaterial } from 'three'
+import { Scene, WebGLRenderer, OrthographicCamera, Vector2, PlaneBufferGeometry, Mesh, MeshBasicMaterial, ShaderMaterial } from 'three'
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js'
-import shaderPosition from './feedback.frag'
+import leakShader from './leak.frag'
+import scratchShader from './scratch.frag'
+import mixShader from './mix.*'
 
 class Snippet{
     constructor(){
@@ -10,69 +12,54 @@ class Snippet{
         this.renderer = new WebGLRenderer( { antialias : false, alpha : true } )
         this.node.appendChild( this.renderer.domElement )
         this.frame = 0
-        this.res = 10
-
-        this.mouse = new Vector2()
         
         this.computeSize = new Vector2( this.node.offsetWidth, this.node.offsetHeight )
         this.gpuCompute = new GPUComputationRenderer( this.computeSize.x, this.computeSize.y, this.renderer )
         
-        this.dtPosition = this.gpuCompute.createTexture()
-        var ps = []
-        for( var i = 0 ; i < this.computeSize.x * this.computeSize.y ; i++ ) ps.push( 0,0,0,1 )
-        this.dtPosition.image.data = new Float32Array( ps )
+        // leaks
+        this.dtLeaks = this.gpuCompute.createTexture()
+        var leakTexture = []
+        for( var i = 0 ; i < this.computeSize.x * this.computeSize.y ; i++ ) leakTexture.push( 0,0,0,1 )
+        this.dtLeaks.image.data = new Float32Array( leakTexture )
 
-        this.positionVariable = this.gpuCompute.addVariable( "texturePosition", shaderPosition, this.dtPosition )
-            
-        this.gpuCompute.setVariableDependencies( this.positionVariable, [ this.positionVariable ] )
-        this.positionUniforms = this.positionVariable.material.uniforms
+        this.leaksVariable = this.gpuCompute.addVariable( 'textureLeaks', leakShader, this.dtLeaks )
+        this.leakUniforms = this.leaksVariable.material.uniforms
+        this.leakUniforms[ 'time' ] = { value: 0.0 }
+        this.leakUniforms[ 'seed' ] = { value: Math.random() }
+        this.leakUniforms[ 'size' ] = { value: new Vector2( this.computeSize.x, this.computeSize.y ) }
 
-        this.positionUniforms[ 'time' ] = { value: 0.0 }
-        this.positionUniforms[ 'ramp' ] = { value: 0.0 }
-        this.positionUniforms[ 'seed' ] = { value: Math.random() }
-        this.positionUniforms[ 'touching' ] = { value: false }
-        this.positionUniforms[ 'touch' ] = { value: new Vector2( Math.random(), Math.random() ) }
-        this.positionUniforms[ 'size' ] = { value: new Vector2( this.computeSize.x, this.computeSize.y ) }
+        // scratches
+        this.dtScratch = this.gpuCompute.createTexture()
+        var scratchesTexture = []
+        for( var i = 0 ; i < this.computeSize.x * this.computeSize.y ; i++ ) scratchesTexture.push( 0,0,0,1 )
+        this.dtScratch.image.data = new Float32Array( scratchesTexture )
+        
+        this.scratchVariable = this.gpuCompute.addVariable( 'textureScratches', scratchShader, this.dtScratch )
+        this.scratchUniforms = this.scratchVariable.material.uniforms
+        this.scratchUniforms[ 'time' ] = { value: 0.0 }
+        this.scratchUniforms[ 'seed' ] = { value: Math.random() }
+        this.scratchUniforms[ 'size' ] = { value: new Vector2( this.computeSize.x, this.computeSize.y ) }
 
+        this.gpuCompute.setVariableDependencies( this.leaksVariable, [ this.leaksVariable ] )
+        this.gpuCompute.setVariableDependencies( this.scratchVariable, [ this.scratchVariable ] )
+        
         this.gpuCompute.init()
         
-        this.node.addEventListener( 'mousedown', ( e ) => this.mouseDown( e ) )
-        this.node.addEventListener( 'touchstart', ( e ) => this.touchStart( e ) )
-        this.node.addEventListener( 'mouseup', ( e ) => this.mouseUp( e ) )
-        this.node.addEventListener( 'touchend', ( e ) => this.mouseUp( e ) )
-        
-        var planeSize = Math.max( this.node.offsetWidth, this.node.offsetHeight )
-        this.plane = new Mesh( new PlaneBufferGeometry( this.computeSize.x, this.computeSize.y ), new MeshBasicMaterial( { map : this.dtPosition } ) )
+        var geo = new PlaneBufferGeometry( this.computeSize.x, this.computeSize.y )
+
+        var mat = new ShaderMaterial( {
+            uniforms : {
+                texLeak : { value : this.dtLeaks },
+                texScratch : { value : this.dtScratch }                                                                                                                                                              
+            },
+            vertexShader : mixShader.vert,
+            fragmentShader : mixShader.frag
+        } )
+        this.plane = new Mesh( geo, mat )
         this.scene.add( this.plane )
 
         this.onResize()
         this.step( 0 )
-    }
-
-    touchStart( e ){
-        this.mouse.x = ( e.layerX / this.node.offsetWidth ) * 2 - 1;
-        this.mouse.y = - ( e.layerY / this.node.offsetHeight ) * 2 + 1;
-        this.cursorAction()
-    }
-
-    mouseDown( e ){
-        this.mouse.x = ( e.clientX / this.node.offsetWidth ) * 2 - 1;
-        this.mouse.y = - ( e.clientY / this.node.offsetHeight ) * 2 + 1;
-        this.cursorAction()
-    }
-
-    cursorAction( ){
-        var raycaster = new Raycaster()
-        raycaster.setFromCamera( this.mouse, this.camera );
-        var intersects = raycaster.intersectObjects( this.scene.children )
-        if( intersects.length ) this.positionUniforms[ 'touch' ] = { value: intersects[ 0 ].uv }
-        this.positionUniforms[ 'seed' ] = { value: Math.random() }
-        this.positionUniforms[ 'ramp' ] = { value: 1.0 }
-        this.positionUniforms[ 'touching' ] = { value: true }
-    }
-
-    mouseUp( e ){
-        this.positionUniforms[ 'touching' ] = { value: false }
     }
 
     onResize( ) {
@@ -89,13 +76,16 @@ class Snippet{
     step( time ){
         requestAnimationFrame( ( time ) => this.step( time ) )
 
-        this.positionUniforms[ 'ramp' ].value -= this.positionUniforms[ 'ramp' ].value * 0.01
-        this.positionUniforms[ 'time' ].value += 0.01
+        this.leakUniforms[ 'time' ].value += 0.01
+        this.leakUniforms[ 'seed' ] = { value: Math.random() }
+
+        this.scratchUniforms[ 'time' ].value += 0.01
+        this.scratchUniforms[ 'seed' ] = { value: Math.random() }
+
         if( this.frame % 1 == 0 ){
             this.gpuCompute.compute()
-            this.gpuCompute.compute()
-            this.gpuCompute.compute()
-            this.plane.material.map = this.gpuCompute.getCurrentRenderTarget( this.positionVariable ).texture
+            this.plane.material.uniforms.texLeak.value = this.gpuCompute.getCurrentRenderTarget( this.leaksVariable ).texture
+            this.plane.material.uniforms.texScratch.value = this.gpuCompute.getCurrentRenderTarget( this.scratchVariable ).texture
         }
 
         this.frame++

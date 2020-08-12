@@ -6,6 +6,7 @@
   "scripts": {
     "start": "parcel app/views/*.pug --https --open",
     "new": "sh init.sh",
+    "copy": "sh copy.sh",
     "build": "rm -rf docs && parcel build app/views/*.pug --no-source-maps --out-dir docs --public-url '.'"
   },
   "keywords": [],
@@ -24,8 +25,10 @@
     "@wizpanda/super-gif": "0.0.5",
     "chroma-js": "^2.1.0",
     "dat.gui": "^0.7.7",
+    "delaunator": "^4.0.1",
     "gif.js": "^0.2.0",
     "glsl-curl-noise": "0.0.4",
+    "glsl-hsl2rgb": "^1.1.0",
     "glsl-noise": "0.0.0",
     "glsl-rotate": "^1.1.0",
     "glsl-y-hsv": "^1.0.0",
