@@ -2,14 +2,12 @@ uniform float time;
 uniform sampler2D data;
 uniform float seed;
 uniform vec2 size;
-uniform vec2 splits;
-uniform vec2 move;
 
 const float PI = 3.1415926535897932384626433832795;
 #pragma glslify: curlNoise = require(glsl-curl-noise)
 #pragma glslify: snoise2 = require(glsl-noise/simplex/2d)
 #pragma glslify: snoise3 = require(glsl-noise/simplex/3d)
-
+#define M_PI 3.1415926535897932384626433832795
 
 float sdEquilateralTriangle( in vec2 p){
     const float k = sqrt( 3.0 );
@@ -63,7 +61,6 @@ void main()	{
     vec2 inc = vec2( 1.0 ) / size;
     float l = uv.x - inc.x;
     float r = uv.x + inc.x;
-    float b = uv.y - inc.y;
     float t = uv.y + inc.y;
 
     vec4 base = texture2D( data, uv );
@@ -72,12 +69,7 @@ void main()	{
     vec3 lt = texture2D( texturePosition, vec2( l, t ) ).rgb;
     vec3 tt = texture2D( texturePosition, vec2( uv.x, t ) ).rgb;
     vec3 rt = texture2D( texturePosition, vec2( r, t ) ).rgb;
-    vec3 ll = texture2D( texturePosition, vec2( l, uv.y ) ).rgb;
-    vec3 rr = texture2D( texturePosition, vec2( r, uv.y ) ).rgb;
-    vec3 lb = texture2D( texturePosition, vec2( l, b ) ).rgb;
-    vec3 bb = texture2D( texturePosition, vec2( uv.x, b ) ).rgb;
-    vec3 rb = texture2D( texturePosition, vec2( r, b ) ).rgb;
-
+    
     float k = position.r;
 
     float rand = smoothstep( 0.5, 0.5, ( snoise3( vec3( uv.x, seed , uv.y ) * 512.0 ) + 1.0 ) * 0.5 );
@@ -85,16 +77,14 @@ void main()	{
     vec2 st = gl_FragCoord.xy / size;
     vec3 color = vec3(.0);
 
-    float d = sdEquilateralTriangle( ( uv - vec2( 0.5 ) ) * 1.0 ) + 0.5;
-    float gen = smoothstep( 1.0, 1.0, 1.0 - d ) * rand;
-
-  
-    float nnn = ( snoise2( vec2( d * 1.5, time * 0.5 + seed * 100.0 ) ) + 1.0 ) * 0.5;
-    vec3 ooo = sdEquilateralTriangleDirectional( ( uv - vec2( 0.5 ) ) * 1.0 ) + 0.5;
-
+    float d = uv.y;
+    float gen = smoothstep( 1.0 - inc.y, 1.0 - inc.y + 0.000001, d ) * rand;
+    float vx = sin( M_PI * floor( uv.x * 3.0 ) / 2.0 );
+    float nnn = ( snoise2( vec2( d * 1.5 + vx * 1000.0, time * 0.5 + seed * 100.0 ) ) + 1.0 ) * 0.5;
+   
     float ttt[8];
     
-    if( ooo.g > 0.5 ){
+    if( uv.y < 1.0 - inc.y ){
         decode( ttt, floor( 0.0 + nnn * 128.0 )  );
         // if( lt.r == 0.0 && tt.r == 0.0 && rt.r == 0.0 ) k = ttt[0];
         if( lt.r == 0.0 && tt.r == 0.0 && rt.r == 1.0 ) k = ttt[1];
@@ -104,31 +94,9 @@ void main()	{
         if( lt.r == 1.0 && tt.r == 0.0 && rt.r == 1.0 ) k = ttt[5];
         if( lt.r == 1.0 && tt.r == 1.0 && rt.r == 0.0 ) k = ttt[6];
         if( lt.r == 1.0 && tt.r == 1.0 && rt.r == 1.0 ) k = ttt[7];
-
-    } else {
-        decode( ttt, floor( nnn * 255.0 )  );
-        if( uv.x > 0.5 ){
-            // if( lt.r == 0.0 && ll.r == 0.0 && lb.r == 0.0 ) k = ttt[0];
-            if( lt.r == 0.0 && ll.r == 0.0 && lb.r == 1.0 ) k = ttt[1];
-            if( lt.r == 0.0 && ll.r == 1.0 && lb.r == 0.0 ) k = ttt[2];
-            if( lt.r == 1.0 && ll.r == 0.0 && lb.r == 0.0 ) k = ttt[3];
-            if( lt.r == 0.0 && ll.r == 0.0 && lb.r == 1.0 ) k = ttt[4];
-            if( lt.r == 1.0 && ll.r == 0.0 && lb.r == 1.0 ) k = ttt[5];
-            if( lt.r == 1.0 && ll.r == 1.0 && lb.r == 0.0 ) k = ttt[6];
-            if( lt.r == 1.0 && ll.r == 1.0 && lb.r == 1.0 ) k = ttt[7];
-        } else {
-            // if( rt.r == 0.0 && rr.r == 0.0 && rb.r == 0.0 ) k = ttt[0];
-            if( rt.r == 0.0 && rr.r == 0.0 && rb.r == 1.0 ) k = ttt[1];
-            if( rt.r == 0.0 && rr.r == 1.0 && rb.r == 0.0 ) k = ttt[2];
-            if( rt.r == 1.0 && rr.r == 0.0 && rb.r == 0.0 ) k = ttt[3];
-            if( rt.r == 0.0 && rr.r == 0.0 && rb.r == 1.0 ) k = ttt[4];
-            if( rt.r == 1.0 && rr.r == 0.0 && rb.r == 1.0 ) k = ttt[5];
-            if( rt.r == 1.0 && rr.r == 1.0 && rb.r == 0.0 ) k = ttt[6];
-            if( rt.r == 1.0 && rr.r == 1.0 && rb.r == 1.0 ) k = ttt[7];
-        }
     }
     
-    if( smoothstep( 1.0, 1.0, 1.0 - d ) > 0.0 ) k = gen;
+    if( smoothstep( 1.0 - inc.y, 1.0 - inc.y + 0.000001, d ) > 0.0 ) k = gen;
 
     gl_FragColor = vec4( vec3( k ), 1.0 );
 }

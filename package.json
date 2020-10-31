@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@wizpanda/super-gif": "0.0.5",
+    "ccapture.js": "github:aceslowman/ccapture.js#npm-fix",
     "chroma-js": "^2.1.0",
     "dat.gui": "^0.7.7",
     "delaunator": "^4.0.1",
